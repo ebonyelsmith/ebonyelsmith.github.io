@@ -1,4 +1,4 @@
-/* === General Reset === */
+/* /* === General Reset === */
 * {
   margin: 0;
   padding: 0;
@@ -78,4 +78,110 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+ */
+
+
+/* === General Reset === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* === Body === */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* === Header === */
+header {
+    text-align: center;
+    margin: 40px 0;
+}
+
+header h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 3rem;
+    color: #4a90e2;
+    margin-bottom: 0.2rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+header p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* === Home container === */
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh; /* vertical centering */
+}
+
+/* === Project buttons === */
+.project-button {
+    display: inline-block;
+    background-color: #4a90e2;
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-family: 'Righteous', cursive;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.project-button:hover {
+    background-color: #357ABD;
+    transform: translateY(-3px);
+}
+
+/* === Container for multiple cards/projects (optional) === */
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+/* === Card style (optional if you want to add project cards) === */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    width: 280px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card h2 {
+    margin-bottom: 10px;
+    font-family: 'Righteous', cursive;
+    color: #4a90e2;
+}
+
+.card p {
+    font-size: 1rem;
+}
+
+/* === Links === */
+a {
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
