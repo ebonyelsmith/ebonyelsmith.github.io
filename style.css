@@ -11,6 +11,7 @@ body {
     background-color: #f0f4f8;
     color: #333;
     line-height: 1.6;
+    /* padding: 0 20px; add horizontal padding */
 }
 
 /* === Header === */
@@ -33,6 +34,8 @@ header p {
     font-size: 1.2rem;
     color: #f0f4f8;
 }
+
+
 
 /* === Home container === */
 .home-container {
@@ -103,3 +106,24 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+/* === Section Header === */
+section h2 {
+ font-family: Arial, Helvetica, sans-serif;  /* clean, readable font */
+    font-size: 1.8rem;                         /* slightly smaller than main title */
+    color: #4a90e2;                            /* keep blue accent */
+    margin: 20px 0 10px 0;                     /* spacing above and below */
+    padding-left: 8px;                          /* slight left padding */
+    border-left: 4px solid #4a90e2;           /* optional accent line */
+
+}
+
+section p {
+    font-family: Arial, Helvetica, sans-serif;  /* clean, readable text */
+    font-size: 1rem;                            /* standard paragraph size */
+    color: #333;                                /* dark gray for readability */
+    line-height: 1.6;                           /* extra spacing between lines */
+    margin: 10px 0 20px 0;                      /* spacing above and below paragraph */
+    padding-left: 10px;                         /* optional: align slightly with h2 padding */
+}
+
