@@ -77,7 +77,7 @@ header p {
     background: white;
     border-radius: 12px;
     padding: 20px;
-    width: 280px;
+    width: 400px; /*280px;*/
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -118,6 +118,15 @@ section h2 {
 
 }
 
+section h3 {
+    font-family: Arial, Helvetica, sans-serif;  /* clean, readable font */
+    font-size: 1.4rem;                         /* slightly smaller than h2 */
+    color: #333;                               /* dark gray for contrast */
+    margin: 25px 0 8px 0;                      /* spacing above and below */
+    padding-left: 8px;                         /* slight left padding */
+    border-left: 4px solid #333;              /* optional accent line */
+}
+
 section p {
     font-family: Arial, Helvetica, sans-serif;  /* clean, readable text */
     font-size: 1rem;                            /* standard paragraph size */
@@ -126,4 +135,45 @@ section p {
     margin: 10px 0 20px 0;                      /* spacing above and below paragraph */
     padding-left: 10px;                         /* optional: align slightly with h2 padding */
 }
+
+/* === Tables === */
+/* Table styling */
+iframe {
+    width: 100%;
+    max-height: 2000px; /* Optional max height */
+    border: none;
+    overflow-x: auto; /* Enable horizontal scrolling if needed */
+}
+.my-table {
+    border-collapse: collapse;       /* Merge borders */
+    width: 100%;                     /* Full width */
+    max-width: 800px;                /* Optional max width */
+    max-height: 2000px;            /* Optional max height */
+    margin: 20px auto;               /* Center table */
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background-color: #f9f9f9;      /* Light gray background */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* subtle shadow */
+}
+
+.my-table th, .my-table td {
+    border: 1px solid #ccc;          /* Light border */
+    padding: 8px 12px;               /* Space inside cells */
+    text-align: center;
+}
+
+.my-table th {
+    background-color: #4a90e2;       /* Green header */
+    color: white;
+    font-weight: bold;
+}
+
+.my-table tr:nth-child(even) {
+    background-color: #f2f2f2;       /* Stripe every other row */
+}
+
+.my-table tr:hover {
+    background-color: #e0f7fa;       /* Highlight row on hover */
+}
+
 

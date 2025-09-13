@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project 0 - My Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <h1>Project 1: Images of the Russian Empire </h1>
+            <h2>Colorizing the Prokudin-Gorskii Photo Collection </h2>
+        <p>
+            Russian photographer Sergei Mikhailovich Prokudin-Gorskii (1863-1944) became a pioneer of color photography
+            as early as 1907 and was convinced that color photography would be the wave of the future. Since technology did not
+            exist at this time to prove his claim, he devised a method consisting of recording three exposures of every scene onto
+            a glass plate using a red, green, and blue filter. He envisioned that special projectors could be used to amalgamate the three
+            images to aid in children's education about the vastness of the Russian Empire. Although he abandoned this idea soon after
+            collecting these images, our job is to put his idea into action by aligning and colorizing these images.
+        </p>
+    </header>
+
+    <main>
+        <!-- === Subpart 1 === -->
+        <section>
+            <h2>Alignment</h2>
+                <h3>Goal</h3>
+                    <p>As these glass plate negatives have been purchased by the Library of Congress and digitized, they have
+                        been scanned in such a way that the three color channels (red, green, and blue) are stacked vertically.
+                        Our job is to separate these channels, align them, and then stack them back together to create a color image.
+                    </p>
+                    <div class="container">
+                            <img src="additonal_media/align_visualization.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Demonstration of the alignment process.</p>
+                    </div>
+                <h3>Method: Exhaustive Search</h3>
+                    <p> 
+                        The simplest method to align the channels is to use an exhaustive search over a window of possible displacements
+                        (e.g. [-15, 15] pixels in both x and y directions), score each displacement using an image similarity metric,
+                        and then select the displacement that yields the best score. The metric selected for this project is normalized
+                        cross-correlation (NCC). Note that NCC ranges from -1 to 1, where 1 indicates perfect correlation. Thus, the displacement
+                        that maximizes NCC is selected as the best displacement. It is important to note that black borders present in the filters
+                        can skew the NCC metric, thus we only compute NCC over the central region of the image (i.e. ignore a border of 15% of the image width and height).
+                    </p>
+                    <div class="container">
+                        <div class="card">
+                            <img src="additonal_media/ncc.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                        </div>
+                    </div>  
+                    <p>
+                        This method works pretty well for the lower resolution jpg images as our search window is large enough to capture
+                        the correct displacement, yet small enough to avoid unreasonable computation time.
+                    </p>
+                    <div class="container">
+                        <div class="card">
+                            <img src="output_images/cathedral/color_aligned_cathedral.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Cathedral aligned using exhaustive search.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/monastery/color_aligned_monastery.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Monastery aligned using exhaustive search.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/tobolsk/color_aligned_tobolsk.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Tobolsk aligned using exhaustive search.</p>
+                        </div>
+                    </div>
+                    <p>
+                        However, once we move to higher resolution tiff images, this method becomes computationally infeasible as the necessary
+                        search window becomes too large. Thus, we seek to implement a multiscale alignment technique that allows for alignment
+                        of higher resolution images in a reasonable amount of time (less than one minute)
+                    </p>
+
+                <h3>Method: Multiscale Alignment (Image Pyramids)</h3>
+                    <p>
+                        The idea behind multiscale alignment via image pyramids is to downsample these large resolution images in levels
+                        until they are small enough to be aligned using the exhaustive search method discussed before. Once aligned at the smallest level,
+                        the displacements are upsampled to the next level, and a local search is performed around this upsampled displacement to refine it.
+                        These steps are repeated until the original image resolution is refined for the final displacement. This method is effective and much less
+                        computational expensive than exhaustive search on the full resolution image because it allows for a course estimate of the alignment
+                        at lower resolutions which are iteratively refined as the resolution increases.
+                    </p>
+                    <p>
+                        Although we were allowed to use im.resize, the mechanics of resizing an image consists of two steps: (1) low-pass filtering with a 
+                        Gaussian filter for anti-aliasing purposes, and (2) downsampling by selecting every second pixel in each dimension. Here is a visualization of the process:
+                    </p>
+                    <div class="container">
+                        <div class="card", style="width: 55%;">
+                            <img src="additonal_media/pyramid.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Visualization of the image pyramid process.</p>
+                            <p>Source: Wikipedia </p>
+                        </div>
+                    </div>  
+                    <p>
+                        Here are the results of the multiscale alignment method via image pyramids on the higher resolution tiff images:
+                    </p>
+
+                    <div class="container">
+                        <div class="card">
+                            <img src="output_images/church/color_aligned_church.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Church aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/emir/color_aligned_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Emir aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/harvesters/color_aligned_harvesters.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Harvesters aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/icon/color_aligned_icon.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Icon aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/italil/color_aligned_italil.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Italil aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lastochikino/color_aligned_lastochikino.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Lastochikino aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lugano/color_aligned_lugano.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Lugano aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/melons/color_aligned_melons.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Melons aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/self_portrait/color_aligned_self_portrait.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Self Portrait aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/siren/color_aligned_siren.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Siren aligned using multiscale alignment.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/three_generations/color_aligned_three_generations.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Three Generations aligned using multiscale alignment.</p>
+                        </div>
+                    </div>
+
+                <h3>Method: Multiscale Alignment with Edge Detection via Sobel Filter (Bells and Whistles 1)</h3>
+                    <p>
+                    Overall, the multiscale alignment method via image pyramids works quite well, however, if you take a closer look,
+                    you will notice that one image is still quite misaligned (Emir). This is likely due to the fact that channels
+                    can differ in brightness, exposure, and constrast, which can make alignment solely based on pixel intensities
+                    difficult. Specifically, look out bright the blue of his coat is compared to the other colors in the image. 
+                    Thus, image detection via edge detection is much more reliable for alignment. 
+                    </p>
+
+                    <p>
+                        The Sobel filter is a classic derivative filter that computes the partial derivative of the image intensity
+                        at each pixel with respect to a particular direction (e.g. horizontal or vertical). By stacking these partial
+                        derivatives, we achieve the gradient of the image where the gradient points in the direction of the most rapid
+                        increase in intensity, and the magnitude of the gradient indicates the edge strength. Thus, by applying the Sobel filter
+                        to each channel prior to alignment, we can rely on aligning the edges (which is more robust to changes in brightness, 
+                        exposure, and contrast) rather than the pixel intensities themselves. The sobel filter is shown below:
+                    </p>
+                    <div class="container">
+                        <div class="card", style="width: 65%;">
+                            <img src="additonal_media/sobel.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Sobel filter kernels for vertical (left) and horizontal (right) edge detection.</p>
+                        </div>
+                    </div>
+
+                    <p>
+                    Let's focus on using the Sobel filter to detect edges in the Emir image and then use these edges for alignment 
+                    via the multiscale alignment method and NCC metric. Here are the Sobel edge detected channels:
+                    </p>
+
+                    <div class="container">
+                        <div class="card">
+                            <img src="additonal_media/red_edges.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Red channel after Sobel edge detection.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="additonal_media/green_edges.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Green channel after Sobel edge detection.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="additonal_media/blue_edges.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Blue channel after Sobel edge detection.</p>
+                        </div>
+                    </div>
+
+                    <p>
+                    Now, after applying the Sobel filter to each channel, we use these detected edges for alignment via the multiscale alignment method
+                    and NCC metric. Here is the result:
+                    </p>
+                    <div class="container">
+                        <div class="card">
+                            <img src="output_images/emir/edge_aligned_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Emir aligned using multiscale alignment with Sobel edge detection.</p>
+                        </div>  
+                    </div>
+                    <p>
+                        As you can see, the alignment is much better than before. Thus, using edge detection via the Sobel filter
+                        prior to alignment is a more robust method for aligning images with varying brightness, exposure, and contrast.
+                    </p>
+
+                <h3>Alignment Log</h3>
+                <p>
+                    Here is a log of the alignment results for each image including the displacements for the red and green channels
+                    with respect to the blue channel as well as the time taken to perform the alignment. Note that jpg images were aligned
+                    with the exhaustive search method, while tiff images were aligned with the multiscale alignment method.
+
+
+                <!-- Pasting entire table here -->
+                 <!--  -->
+                <div class="container">
+                    <!-- <div class="card", style="width: 100%;"> -->
+                        <table border="1" class="my-table">
+                        <thead>
+                            <tr style="text-align: right;">
+                            <th>Image Name</th>
+                            <th>dx_red</th>
+                            <th>dy_red</th>
+                            <th>dx_green</th>
+                            <th>dy_green</th>
+                            <th>Elapsed Time (s)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td>harvesters</td>
+                            <td>14</td>
+                            <td>124</td>
+                            <td>17</td>
+                            <td>59</td>
+                            <td>7.397306</td>
+                            </tr>
+                            <tr>
+                            <td>church</td>
+                            <td>-4</td>
+                            <td>58</td>
+                            <td>4</td>
+                            <td>25</td>
+                            <td>8.084272</td>
+                            </tr>
+                            <tr>
+                            <td>cathedral</td>
+                            <td>3</td>
+                            <td>12</td>
+                            <td>2</td>
+                            <td>5</td>
+                            <td>1.305180</td>
+                            </tr>
+                            <tr>
+                            <td>icon</td>
+                            <td>23</td>
+                            <td>89</td>
+                            <td>17</td>
+                            <td>41</td>
+                            <td>7.604784</td>
+                            </tr>
+                            <tr>
+                            <td>italil</td>
+                            <td>35</td>
+                            <td>77</td>
+                            <td>21</td>
+                            <td>38</td>
+                            <td>7.948450</td>
+                            </tr>
+                            <tr>
+                            <td>lastochikino</td>
+                            <td>-9</td>
+                            <td>75</td>
+                            <td>-2</td>
+                            <td>-3</td>
+                            <td>7.797364</td>
+                            </tr>
+                            <tr>
+                            <td>lugano</td>
+                            <td>-29</td>
+                            <td>93</td>
+                            <td>-16</td>
+                            <td>41</td>
+                            <td>7.876736</td>
+                            </tr>
+                            <tr>
+                            <td>melons</td>
+                            <td>14</td>
+                            <td>179</td>
+                            <td>11</td>
+                            <td>82</td>
+                            <td>7.697860</td>
+                            </tr>
+                            <tr>
+                            <td>monastery</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>-3</td>
+                            <td>1.218300</td>
+                            </tr>
+                            <tr>
+                            <td>self_portrait</td>
+                            <td>37</td>
+                            <td>176</td>
+                            <td>29</td>
+                            <td>79</td>
+                            <td>7.626427</td>
+                            </tr>
+                            <tr>
+                            <td>siren</td>
+                            <td>-25</td>
+                            <td>96</td>
+                            <td>-6</td>
+                            <td>49</td>
+                            <td>8.018773</td>
+                            </tr>
+                            <tr>
+                            <td>three_generations</td>
+                            <td>11</td>
+                            <td>111</td>
+                            <td>14</td>
+                            <td>52</td>
+                            <td>7.614144</td>
+                            </tr>
+                            <tr>
+                            <td>tobolsk</td>
+                            <td>3</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>1.169255</td>
+                            </tr>
+                            <tr>
+                            <td>emir</td>
+                            <td>51</td>
+                            <td>47</td>
+                            <td>24</td>
+                            <td>49</td>
+                            <td>8.798014</td>
+                            </tr>
+                            <tr>
+                            <td>choice1</td>
+                            <td>48</td>
+                            <td>47</td>
+                            <td>24</td>
+                            <td>28</td>
+                            <td>9.847098</td>
+                            </tr>
+                            <tr>
+                            <td>choice4</td>
+                            <td>-27</td>
+                            <td>140</td>
+                            <td>-11</td>
+                            <td>33</td>
+                            <td>8.377567</td>
+                            </tr>
+                        </tbody>
+                        </table>
+
+                    <!-- </div> -->
+                </div>
+                        
+                        
+
+
+
+
+
+
+
+                <!--  -->
+                <!-- Pasting entire table here -->
+
+        <!-- === Subpart 2 === -->
+        <section>
+            <h2>Bells and Whistles</h2>
+                <h3>Automatic Cropping (Bells and Whistles 2)</h3>
+                    <p> Now that all of the images are nice and aligned, let's do some post processing to make the images look
+                        more presentable. Notice that after alignment, there are black borders around images from the original stacking
+                        and colorful borders leftover from the alignment process. To get rid of these borders, we will implement an automatic
+                        cropping algorithm that detects these defects and crops them out. This algorithm works by first extracting a border
+                        of a certain percentage of the image width and height (i.e. 10%). Then, for each pair of channels, we compute an
+                        error metric (i.e. square error) between the corresponding border pixels. (Metric inspired by peer: Ishir Garg) The error metric is defined below:
+                    </p>
+                    <div class="container">
+                        <div class="card", style="width: 55%;">
+                            <img src="additonal_media/error_crop.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <!-- <p>Visualization of the automatic cropping process.</p> -->
+                        </div>
+                    </div>
+                    <p>
+                        If the error metric is below or above a certain threshold, I assume that the border is black or white thus it is assigned a
+                        high error value. Otherwise, the sum of squared differences between the border pixels is computed. After computing the error
+                        metric for each pair of channels, everything above an error threshold of 0.5 is cropped out. Note that, we control 
+                        the aggressiveness of the cropping via the border percentage parameter. Here are the results of the automatic cropping algorithm:
+                    </p>
+                    <div class="container">
+                        <div class="card">
+                            <img src="output_images/cathedral/color_cropped_cathedral.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Cathedral aligned using exhaustive search then cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/monastery/color_cropped_monastery.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Monastery aligned using exhaustive search then cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/tobolsk/color_cropped_tobolsk.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Tobolsk aligned using exhaustive search then cropped.</p>
+                        </div>
+                        <div class="card">
+                            <img src="output_images/church/color_cropped_church.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Church aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/emir/edge_cropped_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Emir aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/harvesters/color_cropped_harvesters.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Harvesters aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/icon/color_cropped_icon.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Icon aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/italil/color_cropped_italil.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Italil aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lastochikino/color_cropped_lastochikino.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Lastochikino aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lugano/color_cropped_lugano.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Lugano aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/melons/color_cropped_melons.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Melons aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/self_portrait/color_cropped_self_portrait.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Self Portrait aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/siren/color_cropped_siren.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Siren aligned using multiscale alignment then cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/three_generations/color_cropped_three_generations.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Three Generations aligned using multiscale alignment then cropped.</p>
+                        </div>
+                    </div>
+
+                <h3> Automatic Contrasting (Bells and Whistles 3)</h3>
+                <p>
+                    Another post processing step that can be done is contrasting. This consists of scaling the image intensities such that
+                    the darkest pixel is black (0) and the brightest pixel is white (255). The method that worked the best was a non-linear mapping
+                    (of course). Specifically, the method was histogram equalization on the luminance of the image. This method works by
+                    first converting the image from RBG to YCbCr (Y = luminance, Cb = blue-difference chroma, Cr = red-difference chroma). Specifically,
+                    the Y channel carries the brightness information on the gray scale, while the Cb and Cr channels carry the color information. Thus,
+                    we can focus on enhancing the contrast of the Y channel only via histogram equalization. Histogram equalization works by
+                    computing the histogram of the pixel intensities in the Y channel, then computing the cumulative distribution function (CDF) of this histogram,
+                    and finally mapping the pixel intensities based on this CDF via interpolation. This has the effect of spreading out the most frequent intensity values, 
+                    thus flattening the histogram of the pixel intensities. After enhancing the contrast of the Y channel, we convert the image back to RGB color space.
+                    Here are the results of the automatic contrasting algorithm:
+                </p>
+                <div class="container">
+                        <div class="card">
+                            <img src="output_images/cathedral/color_contrast_cathedral.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of cathedral aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/monastery/color_contrast_monastery.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of monastery aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/tobolsk/color_contrast_tobolsk.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of tobolsk aligned and cropped.</p>
+                        </div>
+                        <div class="card">
+                            <img src="output_images/church/color_contrast_church.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of church aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/emir/edge_contrast_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of emir aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/harvesters/color_contrast_harvesters.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of harvesters aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/icon/color_contrast_icon.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of icon aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/italil/color_contrast_italil.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of italil aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lastochikino/color_contrast_lastochikino.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of lastochikino aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lugano/color_contrast_lugano.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of lugano aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/melons/color_contrast_melons.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of melons aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/self_portrait/color_contrast_self_portrait.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of Self Portrait aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/siren/color_contrast_siren.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of siren aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/three_generations/color_contrast_three_generations.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic contrast of Three Generations aligned and cropped.</p>
+                        </div>
+                    </div>
+
+                <h3> Automatic White Balancing (Bells and Whistles 4)</h3>
+                <p>
+                    The next post processing method explored is automatic white balancing. This consists of scaling the color channels such that
+                    the image looks more realistic and natural. It seems to enhance the white areas of the image to be more white thus improving the overall
+                    appearance of the image. The method that worked the best was the White Patch Algorithm. This consists of defining a certain percentile
+                    (e.g. 95th percentile) of the pixel intensities in each channel as white (255) and then scaling the rest of the pixel intensities
+                    accordingly (and clipping anything above 255 to be 255). The results of the automatic white balancing algorithm are shown below:
+                </p>
+                <div class="container">
+                        <div class="card">
+                            <img src="output_images/cathedral/color_white_balanced_cathedral.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of cathedral aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/monastery/color_white_balanced_monastery.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of monastery aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/tobolsk/color_white_balanced_tobolsk.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of tobolsk aligned and cropped.</p>
+                        </div>
+                        <div class="card">
+                            <img src="output_images/church/color_white_balanced_church.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of church aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/emir/edge_white_balanced_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of emir aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/harvesters/color_white_balanced_harvesters.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of harvesters aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/icon/color_white_balanced_icon.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of icon aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/italil/color_white_balanced_italil.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of italil aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lastochikino/color_white_balanced_lastochikino.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of lastochikino aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lugano/color_white_balanced_lugano.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of lugano aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/melons/color_white_balanced_melons.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of melons aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/self_portrait/color_white_balanced_self_portrait.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of Self Portrait aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/siren/color_white_balanced_siren.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of siren aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/three_generations/color_white_balanced_three_generations.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic white balance of Three Generations aligned and cropped.</p>
+                        </div>
+                    </div>
+
+
+                <h3> Automatic Color Mapping (Bells and Whistles 5)</h3>
+                <p>
+                    The next post processing method explored is automatic color mapping. This follows similarly to automatic contrasting.
+                    The intuition is that the filters that Prokudin-Gorskii used to capture these images likely weren't perfectly
+                    red, green, and blue. Thus, we can attempt to find a more natural appearance of the image by mapping the colors
+                    to a more realistic color space. This method looks more natural in some images (i.e. sky is bluer), however, the originial
+                    image looks better in other cases. The method considered is the gray world assumption. This consists of scaling the color channels such that
+                    the average color of the image is gray. This is achived by computing the mean of each channel, then computing the overall mean of these means,
+                    and finally scaling each channel by the ratio of the overall mean to the channel mean (and clipping anything above 255 to be 255). The images where
+                    this worked quite well are the first three images (cathedral, self portrait, lastochikino). The remaining images have
+                    a weird green tint, but they are included for observational purposes. Here are the results of the automatic color mapping algorithm:
+                </p>
+                <div class="container">
+                        <div class="card">
+                            <img src="output_images/cathedral/color_color_mapped_cathedral.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of cathedral aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/self_portrait/color_color_mapped_self_portrait.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of Self Portrait aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lastochikino/color_color_mapped_lastochikino.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of lastochikino aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/monastery/color_color_mapped_monastery.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of monastery aligned and cropped.</p>
+                        </div>
+                    
+                        <div class="card">
+                            <img src="output_images/tobolsk/color_color_mapped_tobolsk.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of tobolsk aligned and cropped.</p>
+                        </div>
+                        <div class="card">
+                            <img src="output_images/church/color_color_mapped_church.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of church aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/emir/edge_color_mapped_emir.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of emir aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/harvesters/color_color_mapped_harvesters.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of harvesters aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/icon/color_color_mapped_icon.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of icon aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/italil/color_color_mapped_italil.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of italil aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/lugano/color_color_mapped_lugano.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of lugano aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/melons/color_color_mapped_melons.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of melons aligned and cropped.</p>
+                        </div>
+
+                        
+
+                        <div class="card">
+                            <img src="output_images/siren/color_color_mapped_siren.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of siren aligned and cropped.</p>
+                        </div>
+
+                        <div class="card">
+                            <img src="output_images/three_generations/color_color_mapped_three_generations.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                            <p>Automatic color mapping of Three Generations aligned and cropped.</p>
+                        </div>
+                    </div>
+        </section>
+
+        <!-- === Subpart 3 === -->
+        <section>
+            <h2>Additional: Images of My Choosing</h2>
+            
+            <p>
+                I also wanted to test my alignment and post processing algorithms on
+                some other images of my choosing from the Prokudin-Gorskii collection. The images with a description of the
+                post processing methods are shown below:
+            </p>
+            <div class="container">
+                    <div class="card">
+                        <img src="output_images/choice1/color_cropped_choice1.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                        <p>Choice 1 aligned using multiscale alignment via color similarity and cropped.</p>
+                    </div>
+                    <div class="card">
+                        <img src="output_images/choice1/color_white_balanced_choice1.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                        <p>Choice 1 aligned using multiscale alignment via color similarity, cropped, and white balanced.</p>
+                    </div>
+
+                    <div class="card">
+                        <img src="output_images/choice4/color_cropped_choice4.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                        <p>Choice 2 aligned using multiscale alignment via color similarity and cropped.</p>
+                    </div>
+                    <div class="card">
+                        <img src="output_images/choice4/color_contrast_choice4.png" alt="Subpart 2 Image 3" style="width:100%; border-radius:8px;">
+                        <p>Choice 2 aligned using multiscale alignment via color similarity, cropped, and contrast enhanced.</p>
+                    </div>
+
+
+        </section>
+
+        <section>
+            <h2>Final Thoughts</h2>
+            <p>
+                Overall, this project was quite interesting to get a glimpse into the early days of color photography as well gain 
+                exposure to some classical image processing techniques. I have to agree that debugging visual data is a lot nicer than 
+                debugging numerical data. The absolute hardest part was getting the image pyramid to work correctly. The scaling up and down 
+                of the displacements was a bit tricky. Everything else was pretty straighforward.
+        </section>
+    </main>
+
+    <footer style="text-align:center; padding:20px;">
+        <a href="../index.html" class="project-button">Back to Portfolio</a>
+    </footer>
+    
+</body>
+</html>
