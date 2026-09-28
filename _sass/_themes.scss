@@ -1,0 +1,48 @@
+// // Light theme color tokens
+// :root {
+//   --global-theme-color: #8250df;
+//   --global-hover-color: #663399;
+//   --global-bg-color: #ffffff;
+//   --global-code-bg-color: #f3e8f8;
+// }
+
+// // Dark theme color tokens
+// [data-theme="dark"] {
+//   --global-theme-color: #a87ffb;
+//   --global-hover-color: #c4a7fe;
+//   --global-bg-color: #1c1c1d;
+//   --global-code-bg-color: #2d2038;
+// }
+
+// Light theme color tokens
+:root {
+  --global-theme-color: #00838f;
+  --global-hover-color: #006064;
+  --global-bg-color: #ffffff;
+  --global-text-color: #000000;
+  --global-text-color-light: #828282;
+  --global-header-text-color: #000000;
+  --global-code-bg-color: #e0f7fa;
+
+  /* Footer Colors (Dark Gray Bar in Light Mode) */
+  --global-footer-bg-color: #212529;
+  --global-footer-text-color: #ffffff;
+}
+
+// Dark theme color tokens
+[data-theme="dark"] {
+  --global-theme-color: #4dd0e1;
+  --global-hover-color: #80deea;
+  --global-bg-color: #121e24;
+  
+  /* Text Colors (White for Dark Mode) */
+  --global-text-color: #ffffff;
+  --global-text-color-light: #e0e0e0;
+  --global-header-text-color: #ffffff;
+  
+  --global-code-bg-color: #1a2e3b;
+
+  /* Footer Colors (Dark Gray Bar in Dark Mode) */
+  --global-footer-bg-color: #181b1d;
+  --global-footer-text-color: #ffffff;
+}
